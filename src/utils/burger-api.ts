@@ -1,58 +1,78 @@
-import { setCookie, getCookie } from './cookie';
-import { TIngredient, TOrder, TOrdersData, TUser } from './types';
+import { saveTokens, expireSession, sessionGeneration } from './session';
+import { errorMessage } from './errors';
+import { getCookie } from './cookie';
+import { TIngredient, TOrder, TUser } from './types';
 
 const URL = process.env.BURGER_API_URL;
 
-const checkResponse = <T>(res: Response): Promise<T> =>
-  res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
+const checkResponse = async <T>(res: Response): Promise<T> => {
+  const data = await res.json();
+  if (!res.ok || data.success === false) throw data;
+  return data as T;
+};
 
-type TServerResponse<T> = {
-  success: boolean;
-} & T;
-
+type TServerResponse<T> = { success: boolean } & T;
 type TRefreshResponse = TServerResponse<{
   refreshToken: string;
   accessToken: string;
 }>;
+let refreshRequest: Promise<TRefreshResponse> | null = null;
 
-export const refreshToken = (): Promise<TRefreshResponse> =>
-  fetch(`${URL}/auth/token`, {
+export const refreshToken = (): Promise<TRefreshResponse> => {
+  if (refreshRequest) return refreshRequest;
+  const generation = sessionGeneration();
+  refreshRequest = fetch(`${URL}/auth/token`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json;charset=utf-8'
-    },
-    body: JSON.stringify({
-      token: localStorage.getItem('refreshToken')
-    })
+    headers: { 'Content-Type': 'application/json;charset=utf-8' },
+    body: JSON.stringify({ token: localStorage.getItem('refreshToken') })
   })
     .then((res) => checkResponse<TRefreshResponse>(res))
-    .then((refreshData) => {
-      if (!refreshData.success) {
-        return Promise.reject(refreshData);
-      }
-      localStorage.setItem('refreshToken', refreshData.refreshToken);
-      setCookie('accessToken', refreshData.accessToken);
-      return refreshData;
+    .then((data) => {
+      if (generation !== sessionGeneration())
+        throw new Error('Сессия завершена');
+      saveTokens(data);
+      return data;
+    })
+    .catch((error) => {
+      if (generation === sessionGeneration()) expireSession();
+      throw error;
+    })
+    .finally(() => {
+      refreshRequest = null;
     });
+  return refreshRequest;
+};
+
+const isTokenError = (error: unknown) =>
+  /jwt expired|jwt malformed|invalid token|invalid signature|token is invalid|token is not valid|you should be authorised|you should be authorized/i.test(
+    errorMessage(error)
+  );
 
 export const fetchWithRefresh = async <T>(
   url: RequestInfo,
   options: RequestInit
-) => {
+): Promise<T> => {
+  const generation = sessionGeneration();
+  const headers = new Headers(options.headers);
+  if (!getCookie('accessToken') && localStorage.getItem('refreshToken')) {
+    const data = await refreshToken();
+    headers.set('authorization', data.accessToken);
+  }
   try {
-    const res = await fetch(url, options);
-    return await checkResponse<T>(res);
-  } catch (err) {
-    if ((err as { message: string }).message === 'jwt expired') {
-      const refreshData = await refreshToken();
-      if (options.headers) {
-        (options.headers as { [key: string]: string }).authorization =
-          refreshData.accessToken;
-      }
-      const res = await fetch(url, options);
-      return await checkResponse<T>(res);
-    } else {
-      return Promise.reject(err);
+    return await checkResponse<T>(await fetch(url, { ...options, headers }));
+  } catch (error) {
+    if (!isTokenError(error) || generation !== sessionGeneration()) throw error;
+    if (!localStorage.getItem('refreshToken')) {
+      expireSession();
+      throw error;
+    }
+    const data = await refreshToken();
+    headers.set('authorization', data.accessToken);
+    try {
+      return await checkResponse<T>(await fetch(url, { ...options, headers }));
+    } catch (retryError) {
+      if (isTokenError(retryError)) expireSession();
+      throw retryError;
     }
   }
 };
@@ -184,7 +204,7 @@ export const forgotPasswordApi = (data: { email: string }) =>
     },
     body: JSON.stringify(data)
   })
-    .then((res) => checkResponse<TServerResponse<{}>>(res))
+    .then((res) => checkResponse<TServerResponse<{ message?: string }>>(res))
     .then((data) => {
       if (data?.success) return data;
       return Promise.reject(data);
@@ -198,7 +218,7 @@ export const resetPasswordApi = (data: { password: string; token: string }) =>
     },
     body: JSON.stringify(data)
   })
-    .then((res) => checkResponse<TServerResponse<{}>>(res))
+    .then((res) => checkResponse<TServerResponse<{ message?: string }>>(res))
     .then((data) => {
       if (data?.success) return data;
       return Promise.reject(data);
@@ -232,4 +252,4 @@ export const logoutApi = () =>
     body: JSON.stringify({
       token: localStorage.getItem('refreshToken')
     })
-  }).then((res) => checkResponse<TServerResponse<{}>>(res));
+  }).then((res) => checkResponse<TServerResponse<{ message?: string }>>(res));

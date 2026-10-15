@@ -33,6 +33,7 @@ export function setCookie(
   value = encodeURIComponent(value);
   let updatedCookie = name + '=' + value;
   for (const propName in props) {
+    if (props[propName] === false) continue;
     updatedCookie += '; ' + propName;
     const propValue = props[propName];
     if (propValue !== true) {

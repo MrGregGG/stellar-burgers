@@ -1,21 +1,38 @@
-import { FC, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from '../../services/store';
+import {
+  fetchOrderDetails,
+  clearOrderDetails
+} from '../../services/slices/order-details';
+import { fetchIngredients } from '../../services/slices/ingredients';
+import { RequestError, EmptyState } from '../request-state/request-state';
+import { FC, useMemo, useEffect } from 'react';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
-
-  const ingredients: TIngredient[] = [];
+  const { number: param } = useParams();
+  const number = Number(param);
+  const valid =
+    /^\d+$/.test(param || '') && Number.isSafeInteger(number) && number > 0;
+  const dispatch = useDispatch();
+  const details = useSelector((s) => s.orderDetails);
+  const catalog = useSelector((s) => s.ingredients);
+  const cachedOrder = useSelector((s) =>
+    [...s.feed.orders, ...s.profileOrders.orders].find(
+      (o) => o.number === number
+    )
+  );
+  const orderData =
+    details.number === number && details.data ? details.data : cachedOrder;
+  const ingredients = catalog.items;
+  useEffect(() => {
+    if (valid) dispatch(fetchOrderDetails(number));
+    return () => {
+      dispatch(clearOrderDetails());
+    };
+  }, [dispatch, number, valid]);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
@@ -59,6 +76,25 @@ export const OrderInfo: FC = () => {
     };
   }, [orderData, ingredients]);
 
+  if (!valid) return <EmptyState text='Некорректный номер заказа' />;
+  if (catalog.error)
+    return (
+      <RequestError
+        message={catalog.error}
+        retry={() => dispatch(fetchIngredients())}
+      />
+    );
+  if (details.error && !orderData)
+    return (
+      <RequestError
+        message={details.error}
+        retry={() => dispatch(fetchOrderDetails(number))}
+      />
+    );
+  if (details.loaded && details.number === number && !orderData)
+    return <EmptyState text='Заказ не найден' />;
+  if (catalog.loaded && !ingredients.length)
+    return <EmptyState text='Состав заказа временно недоступен' />;
   if (!orderInfo) {
     return <Preloader />;
   }

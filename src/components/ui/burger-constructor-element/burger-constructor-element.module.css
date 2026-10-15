@@ -14,3 +14,9 @@
   width: 100%;
   max-width: 536px;
 }
+
+.element_fullwidth { position: relative; }
+.moveButtons { display: flex; flex-direction: column; gap: 4px; }
+.moveButton { padding: 0; border: 0; background: transparent; cursor: pointer; width: 24px; height: 24px; }
+.moveButton:disabled { cursor: default; }
+.removeButton { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border: 0; padding: 0; background: transparent; cursor: pointer; }

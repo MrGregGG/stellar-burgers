@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { ResetPasswordUIProps } from './type';
 
 export const ResetPasswordUI: FC<ResetPasswordUIProps> = ({
+  loading,
   errorText,
   password,
   setPassword,
@@ -26,6 +27,10 @@ export const ResetPasswordUI: FC<ResetPasswordUIProps> = ({
       >
         <div className='pb-6'>
           <PasswordInput
+            aria-label='Пароль'
+            required
+            minLength={6}
+            disabled={loading}
             onChange={(e) => setPassword(e.target.value)}
             value={password}
             name='password'
@@ -33,8 +38,11 @@ export const ResetPasswordUI: FC<ResetPasswordUIProps> = ({
         </div>
         <div className='pb-6'>
           <Input
+            required
+            disabled={loading}
             type='text'
             placeholder='Введите код из письма'
+            aria-label='Введите код из письма'
             onChange={(e) => setToken(e.target.value)}
             value={token}
             name='token'
@@ -44,13 +52,26 @@ export const ResetPasswordUI: FC<ResetPasswordUIProps> = ({
           />
         </div>
         <div className={`pb-6 ${styles.button}`}>
-          <Button type='primary' size='medium' htmlType='submit'>
+          <Button
+            type='primary'
+            size='medium'
+            htmlType='submit'
+            disabled={loading}
+          >
             Сохранить
           </Button>
         </div>
         {errorText && (
-          <p className={`${styles.error} text text_type_main-default pb-6`}>
+          <p
+            role='alert'
+            className={`${styles.error} text text_type_main-default pb-6`}
+          >
             {errorText}
+          </p>
+        )}
+        {loading && (
+          <p role='status' className='text text_type_main-default'>
+            Подождите…
           </p>
         )}
       </form>
