@@ -1,0 +1,93 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+v22.15.0
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> stellar-burgers@0.1.0 typecheck
+> tsc --noEmit
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> stellar-burgers@0.1.0 lint
+> eslint --ext .js,.jsx,.ts,.tsx ./src
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> stellar-burgers@0.1.0 test
+> jest --runInBand
+
+PASS src/services/store.test.ts
+PASS src/components/protected-route/protected-route.test.tsx
+PASS src/utils/burger-api.test.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       18 passed, 18 total
+Snapshots:   0 total
+Time:        4.127 s
+Ran all test suites.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> stellar-burgers@0.1.0 build
+> webpack --mode=production
+
+assets by status 324 KiB [cached] 7 assets
+assets by status 389 KiB [emitted]
+  asset main.2d69f083493267a1e3f0.js 389 KiB [emitted] [immutable] [minimized] [big] (name: main) 1 related asset
+  asset index.html 476 bytes [emitted] [compared for emit]
+orphan modules 637 KiB [orphan] 152 modules
+runtime modules 2.72 KiB 9 modules
+javascript modules 995 KiB
+  modules by path ./node_modules/ 331 KiB 183 modules
+  modules by path ./src/ 664 KiB
+    modules by path ./src/components/ui/ 24.2 KiB
+      modules by path ./src/components/ui/pages/ 4.91 KiB 5 modules
+      + 16 modules
+    + 4 modules
+asset modules 294 bytes (javascript) 324 KiB (asset)
+  modules by path ./node_modules/@zlden/react-developer-burger-ui-components/dist/ui/fonts/*.woff2 126 bytes (javascript) 115 KiB (asset) 3 modules
+  modules by path ./node_modules/@zlden/react-developer-burger-ui-components/dist/ui/fonts/*.woff 126 bytes (javascript) 146 KiB (asset)
+    ./node_modules/@zlden/react-developer-burger-ui-components/dist/ui/fonts/JetBrai...(truncated) 42 bytes (javascript) 62.9 KiB (asset) [built] [code generated]
+    + 2 modules
+  ./src/images/done.svg 42 bytes (javascript) 62.7 KiB (asset) [built] [code generated]
+
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  main.2d69f083493267a1e3f0.js (389 KiB)
+
+WARNING in entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (244 KiB). This can impact web performance.
+Entrypoints:
+  main (389 KiB)
+      main.2d69f083493267a1e3f0.js
+
+WARNING in webpack performance recommendations: 
+You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+For more info visit https://webpack.js.org/guides/code-splitting/
+
+webpack 5.89.0 compiled with 3 warnings in 10002 ms
+PASS constructor loads, ingredient modal closes with Escape and overlay
+PASS reload of modal URL opens full detail page; missing ingredient has an empty state
+PASS duplicate ingredients, counters, price, keyboard move and removal
+PASS guest constructor survives login and order failure; successful order clears it
+PASS profile edits cancel and save; blank password is omitted; session survives reload
+PASS feed statistics, price, order modal and direct order details
+PASS personal history, cancelled status, logout, protected deep link and return after login
+PASS empty orders render without an endless loader; unknown URL renders 404
+PASS forgot/reset guard, reset form, registration and logout
+PASS ingredient API error can be retried and console has no unhandled errors
+{
+  "passed": 10,
+  "checks": [
+    "constructor loads, ingredient modal closes with Escape and overlay",
+    "reload of modal URL opens full detail page; missing ingredient has an empty state",
+    "duplicate ingredients, counters, price, keyboard move and removal",
+    "guest constructor survives login and order failure; successful order clears it",
+    "profile edits cancel and save; blank password is omitted; session survives reload",
+    "feed statistics, price, order modal and direct order details",
+    "personal history, cancelled status, logout, protected deep link and return after login",
+    "empty orders render without an endless loader; unknown URL renders 404",
+    "forgot/reset guard, reset form, registration and logout",
+    "ingredient API error can be retried and console has no unhandled errors"
+  ],
+  "apiCalls": 49,
+  "consoleErrors": []
+}
