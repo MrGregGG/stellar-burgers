@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { PageUIProps } from '../common-type';
 
 export const ForgotPasswordUI: FC<PageUIProps> = ({
+  loading,
   errorText,
   email,
   setEmail,
@@ -21,8 +22,11 @@ export const ForgotPasswordUI: FC<PageUIProps> = ({
       >
         <div className='pb-6'>
           <Input
+            required
+            disabled={loading}
             type='email'
             placeholder='Укажите e-mail'
+            aria-label='Укажите e-mail'
             onChange={(e) => setEmail(e.target.value)}
             value={email}
             name='email'
@@ -32,13 +36,26 @@ export const ForgotPasswordUI: FC<PageUIProps> = ({
           />
         </div>
         <div className={`pb-6 ${styles.button}`}>
-          <Button type='primary' size='medium' htmlType='submit'>
+          <Button
+            type='primary'
+            size='medium'
+            htmlType='submit'
+            disabled={loading}
+          >
             Восстановить
           </Button>
         </div>
         {errorText && (
-          <p className={`${styles.error} text text_type_main-default pb-6`}>
+          <p
+            role='alert'
+            className={`${styles.error} text text_type_main-default pb-6`}
+          >
             {errorText}
+          </p>
+        )}
+        {loading && (
+          <p role='status' className='text text_type_main-default'>
+            Подождите…
           </p>
         )}
       </form>

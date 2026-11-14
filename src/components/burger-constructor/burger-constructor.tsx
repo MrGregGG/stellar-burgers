@@ -1,45 +1,37 @@
-import { FC, useMemo } from 'react';
-import { TConstructorIngredient } from '@utils-types';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { BurgerConstructorUI } from '@ui';
-
-export const BurgerConstructor: FC = () => {
-  /** TODO: взять переменные constructorItems, orderRequest и orderModalData из стора */
-  const constructorItems = {
-    bun: {
-      price: 0
-    },
-    ingredients: []
-  };
-
-  const orderRequest = false;
-
-  const orderModalData = null;
-
+import { useDispatch, useSelector } from '../../services/store';
+import { selectConstructor, selectPrice } from '../../services/selectors';
+import { createOrder, closeOrder } from '../../services/slices/order';
+export const BurgerConstructor = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const constructorItems = useSelector(selectConstructor);
+  const price = useSelector(selectPrice);
+  const { user, checked } = useSelector((s) => s.auth);
+  const { loading, data, error, modalOpen } = useSelector((s) => s.order);
   const onOrderClick = () => {
-    if (!constructorItems.bun || orderRequest) return;
+    if (!constructorItems.bun || loading || !checked) return;
+    if (!user) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+    dispatch(createOrder());
   };
-  const closeOrderModal = () => {};
-
-  const price = useMemo(
-    () =>
-      (constructorItems.bun ? constructorItems.bun.price * 2 : 0) +
-      constructorItems.ingredients.reduce(
-        (s: number, v: TConstructorIngredient) => s + v.price,
-        0
-      ),
-    [constructorItems]
-  );
-
-  return null;
-
   return (
     <BurgerConstructorUI
-      price={price}
-      orderRequest={orderRequest}
       constructorItems={constructorItems}
-      orderModalData={orderModalData}
+      price={price}
+      orderRequest={loading}
+      modalOpen={modalOpen}
+      orderModalData={data}
+      error={error}
+      disabled={!checked}
       onOrderClick={onOrderClick}
-      closeOrderModal={closeOrderModal}
+      closeOrderModal={() => {
+        dispatch(closeOrder());
+      }}
     />
   );
 };

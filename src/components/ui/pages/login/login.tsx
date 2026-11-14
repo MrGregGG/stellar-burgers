@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { LoginUIProps } from './type';
 
 export const LoginUI: FC<LoginUIProps> = ({
+  loading,
   email,
   setEmail,
   errorText,
@@ -27,8 +28,11 @@ export const LoginUI: FC<LoginUIProps> = ({
         <>
           <div className='pb-6'>
             <Input
+              required
+              disabled={loading}
               type='email'
               placeholder='E-mail'
+              aria-label='E-mail'
               onChange={(e) => setEmail(e.target.value)}
               value={email}
               name='email'
@@ -39,22 +43,39 @@ export const LoginUI: FC<LoginUIProps> = ({
           </div>
           <div className='pb-6'>
             <PasswordInput
+              aria-label='Пароль'
+              required
+              minLength={6}
+              disabled={loading}
               onChange={(e) => setPassword(e.target.value)}
               value={password}
               name='password'
             />
           </div>
           <div className={`pb-6 ${styles.button}`}>
-            <Button type='primary' size='medium' htmlType='submit'>
+            <Button
+              type='primary'
+              size='medium'
+              htmlType='submit'
+              disabled={loading}
+            >
               Войти
             </Button>
           </div>
           {errorText && (
-            <p className={`${styles.error} text text_type_main-default pb-6`}>
+            <p
+              role='alert'
+              className={`${styles.error} text text_type_main-default pb-6`}
+            >
               {errorText}
             </p>
           )}
         </>
+        {loading && (
+          <p role='status' className='text text_type_main-default'>
+            Подождите…
+          </p>
+        )}
       </form>
       <div className={`pb-4 ${styles.question} text text_type_main-default`}>
         Вы - новый пользователь?

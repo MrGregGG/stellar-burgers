@@ -1,4 +1,9 @@
-import { useSelector } from '../../services/store';
+import { fetchIngredients } from '../../services/slices/ingredients';
+import {
+  RequestError,
+  EmptyState
+} from '../../components/request-state/request-state';
+import { useDispatch, useSelector } from '../../services/store';
 
 import styles from './constructor-page.module.css';
 
@@ -8,8 +13,22 @@ import { Preloader } from '../../components/ui';
 import { FC } from 'react';
 
 export const ConstructorPage: FC = () => {
-  /** TODO: взять переменную из стора */
-  const isIngredientsLoading = false;
+  const dispatch = useDispatch();
+  const {
+    loading: isIngredientsLoading,
+    error,
+    loaded,
+    items
+  } = useSelector((s) => s.ingredients);
+  if (error)
+    return (
+      <RequestError
+        message={error}
+        retry={() => dispatch(fetchIngredients())}
+      />
+    );
+  if (loaded && !items.length)
+    return <EmptyState text='Ингредиенты пока недоступны' />;
 
   return (
     <>

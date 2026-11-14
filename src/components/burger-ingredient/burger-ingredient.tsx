@@ -1,3 +1,6 @@
+import { useDispatch } from '../../services/store';
+import { addIngredient } from '../../services/slices/burger-constructor';
+import { modalState } from '../../utils/modal-routing';
 import { FC, memo } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -8,13 +11,16 @@ export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
   ({ ingredient, count }) => {
     const location = useLocation();
 
-    const handleAdd = () => {};
+    const dispatch = useDispatch();
+    const handleAdd = () => {
+      dispatch(addIngredient(ingredient));
+    };
 
     return (
       <BurgerIngredientUI
         ingredient={ingredient}
         count={count}
-        locationState={{ background: location }}
+        locationState={modalState(location)}
         handleAdd={handleAdd}
       />
     );
